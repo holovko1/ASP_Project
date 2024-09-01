@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
 
+namespace WebPizzaSite.Models.Account;
+
 public class LoginViewModel
 {
     [Display(Name = "Email Address")]
