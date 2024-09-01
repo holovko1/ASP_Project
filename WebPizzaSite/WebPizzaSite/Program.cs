@@ -53,7 +53,6 @@ using (var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>(
     var userManager = serviceScope.ServiceProvider.GetService<UserManager<UserEntity>>();
     var roleManager = serviceScope.ServiceProvider.GetService<RoleManager<RoleEntity>>();
     context?.Database.Migrate();
-
     if (!context.Products.Any())
     {
         var cat = context.Categories.FirstOrDefault();

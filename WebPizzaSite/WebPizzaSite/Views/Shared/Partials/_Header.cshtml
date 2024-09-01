@@ -18,16 +18,28 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page">@User.Identity.Name</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page"
+                            asp-action="Logout" asp-controller="Account">Logout</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page"
+                            asp-action="Login" asp-controller="Account">Вхід</a>
+                        </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page"
-                           asp-action="Login" asp-controller="Account">Вхід</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page"
-                           asp-action="Register" asp-controller="Account">Реєстрація</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page"
+                            asp-action="Register" asp-controller="Account">Реєстрація</a>
+                        </li>
+                    }
                 </ul>
             </div>
         </div>
