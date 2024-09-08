@@ -43,5 +43,13 @@ namespace WebPizzaSite.Controllers
             ModelState.AddModelError("", "Дані вказано не вірно!");
             return View(model);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return Redirect("/");
+        }
     }
 }
