@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using WebPizzaSite.Constants;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace WebPizzaSite.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = Roles.Admin)]
     public class ChartsController : Controller
     {
-        public IActionResult Chart()
+        public IActionResult ChartJS()
         {
             return View();
         }

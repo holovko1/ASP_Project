@@ -42,7 +42,7 @@
 <body>
 
     @await Html.PartialAsync("_Header")
-
+   
     @await Html.PartialAsync("_Sidebar")
 
     <main id="main" class="main">
@@ -50,8 +50,9 @@
         @RenderBody()
 
     </main> <!-- End #main -->
-    @await Html.PartialAsync("_Footer")
 
+    @await Html.PartialAsync("_Footer")
+    
 
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 

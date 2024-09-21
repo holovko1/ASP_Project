@@ -1,13 +1,19 @@
-Ôªøusing Microsoft.AspNetCore.Identity;
+using Bogus;
+using Bogus.DataSets;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebPizzaSite.Constants;
 using WebPizzaSite.Data;
 using WebPizzaSite.Data.Entities;
 using WebPizzaSite.Data.Entities.Identity;
+using WebPizzaSite.Interfaces;
+using WebPizzaSite.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddScoped<IImageWorker, ImageWorker>();
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<PizzaDbContext>(opt =>
@@ -43,71 +49,113 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+
 builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
 using (var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
-{ 
+{
     var context = serviceScope.ServiceProvider.GetService<PizzaDbContext>();
     var userManager = serviceScope.ServiceProvider.GetService<UserManager<UserEntity>>();
     var roleManager = serviceScope.ServiceProvider.GetService<RoleManager<RoleEntity>>();
-    context?.Database.Migrate();
-    if (!context.Products.Any())
-    {
-        var cat = context.Categories.FirstOrDefault();
-        if (cat != null)
-        {
-            var p = new ProductEntity
-            {
-                Category = cat,
-                Name="–ï–ª—å-–ö–∞–ø—Ä—ñ—á–æ",
-                Price=155,
+    var imageWorker = serviceScope.ServiceProvider.GetService<IImageWorker>();
 
-            };
-            var pi1 = new ProductImageEntity
+    context?.Database.Migrate();
+
+    //ˇÍ˘Ó Í‡ÚÂ„Ó≥ø ‚≥‰ÒÚÛÌ≥
+
+    if (!context.Categories.Any())
+    {
+        string url = "https://loremflickr.com/1200/800/tokio,cat/all";
+        var faker = new Faker("uk");
+        var categories = faker.Commerce.Categories(10);
+        foreach (var categoryName in categories)
+        {
+            string fileName = imageWorker.ImageSave(url);
+            if (!string.IsNullOrEmpty(fileName))
             {
-                Name = "1.webp",
-                Priority = 0,
-                Product = p
-            };
-            var pi2 = new ProductImageEntity
-            {
-                Name = "2.webp",
-                Priority = 1,
-                Product = p
-            };
-            context.Add(p);
-            context.Add(pi1);
-            context.Add(pi2);
-            context.SaveChanges();
+
+                var entity = new CategoryEntity
+                {
+                    Name = categoryName,
+                    Description = faker.Lorem.Lines(5),
+                    Image = fileName
+                };
+                context.Categories.Add(entity);
+                context.SaveChanges();
+            }
         }
     }
+
+    if (!context.Products.Any())
+    {
+        string url = "https://loremflickr.com/1200/800/car/all";
+        var faker = new Faker("uk");
+
+        var catCount = context.Categories.Count();
+        if (catCount != 0)
+        {
+
+            var catIds = context.Categories.Select(x => x.Id).ToList();
+            int propductCount = 100;
+            for (int k = 0; k < propductCount; k++)
+            {
+                var catIndex = faker.Random.Number(0, catCount - 1);
+                var p = new ProductEntity
+                {
+                    CategoryId = catIds[catIndex],
+                    Name = faker.Commerce.ProductName(),
+                    Price = decimal.Parse(faker.Commerce.Price())
+                };
+                context.Add(p);
+                int countImages = faker.Random.Number(3, 5);
+                for (int i = 0; i < countImages; i++)
+                {
+                    string fileName = imageWorker.ImageSave(url);
+                    if (!string.IsNullOrEmpty(fileName))
+                    {
+                        var pi = new ProductImageEntity
+                        {
+                            Name = fileName,
+                            Priority = i,
+                            Product = p
+                        };
+                        context.Add(pi);
+                    }
+                }
+                context.SaveChanges();
+            }
+        }
+    }
+
     if (!context.Roles.Any())
     {
         var admin = new RoleEntity
         {
-            Name = Roles.Admin,
+            Name = Roles.Admin
         };
         var result = roleManager.CreateAsync(admin).Result;
         if (!result.Succeeded)
         {
-            Console.WriteLine($"--------–ü–æ–º–∏–ª–∫–∞ —Å—Ç–≤–æ—Ä–µ–Ω–Ω—è —Ä–æ–ª—ñ {Roles.Admin}---------");
+            Console.WriteLine($"------œÓÏËÎÍ‡ ÒÚ‚ÓÂÌÌˇ ÓÎ≥ {Roles.Admin}------");
         }
-        result = roleManager.CreateAsync(new RoleEntity { Name=Roles.User}).Result;
+
+        result = roleManager.CreateAsync(new RoleEntity { Name = Roles.User }).Result;
         if (!result.Succeeded)
         {
-            Console.WriteLine($"--------–ü–æ–º–∏–ª–∫–∞ —Å—Ç–≤–æ—Ä–µ–Ω–Ω—è —Ä–æ–ª—ñ {Roles.User}---------");
+            Console.WriteLine($"------œÓÏËÎÍ‡ ÒÚ‚ÓÂÌÌˇ ÓÎ≥ {Roles.User}------");
         }
     }
+
     if (!context.Users.Any())
     {
         var user = new UserEntity
         {
-            Email = "amdin@gmail.com",
+            Email = "admin@gmail.com",
             UserName = "admin@gmail.com",
-            LastName = "–®–æ–ª–æ–º",
-            FirstName = "–í—É–ª–∫–∞–Ω",
+            LastName = "ÿÓÎÓÏ",
+            FirstName = "¬ÛÎÍ‡Ì",
             Picture = "amdin.jpg"
         };
         var result = userManager.CreateAsync(user, "123456").Result;
@@ -116,12 +164,12 @@ using (var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>(
             result = userManager.AddToRoleAsync(user, Roles.Admin).Result;
             if (!result.Succeeded)
             {
-                Console.WriteLine($"-------–ù–µ –≤–¥–∞–ª–æ—Å—è –Ω–∞–¥–∞—Ç–∏ —Ä–æ–ª—å {Roles.Admin} –∫–æ—Ä–∏—Å—Ç—É–≤–∞—á—É {user.Email}------");
+                Console.WriteLine($"-------ÕÂ ‚‰‡ÎÓÒˇ Ì‡‰‡ÚË ÓÎ¸ {Roles.Admin} ÍÓËÒÚÛ‚‡˜Û {user.Email}------");
             }
         }
         else
         {
-            Console.WriteLine($"-------–ù–µ –≤–¥–∞–ª–æ—Å—è —Å—Ç–≤–æ—Ä–∏—Ç–∏ –∫–æ—Ä–∏—Å—Ç—É–≤–∞—á–∞ {user.Email}-------");
+            Console.WriteLine($"-------ÕÂ ‚‰‡ÎÓÒˇ ÒÚ‚ÓËÚË ÍÓËÒÚÛ‚‡˜‡ {user.Email}-------");
         }
     }
 }
@@ -143,14 +191,13 @@ app.UseAuthorization();
 //app.MapControllerRoute(
 //    name: "default",
 //    pattern: "{controller=Main}/{action=Index}/{id?}");
-
 #pragma warning disable ASP0014 // Suggest using top level route registrations
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapAreaControllerRoute(
         name: "admin_area",
         areaName: "Admin",
-        pattern: "admin/{controller=Home}/{action=Index}/{id?}");
+        pattern: "/admin/{controller=Home}/{action=Index}/{id?}");
 
     endpoints.MapControllerRoute(
         name: "default",

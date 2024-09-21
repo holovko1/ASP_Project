@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebPizzaSite.Data;
@@ -20,20 +21,48 @@ namespace WebPizzaSite.Controllers
             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
         }
-
-        public IActionResult Index()
+        public IActionResult Index(ProductSearchViewModel search)
         {
-            var list = _pizzaDbContext.Products
+            var query = _pizzaDbContext.Products.AsQueryable();
+            int pageSize = 8;
+            int page = search.Page ?? 1;
+            page = page - 1;
+
+            if(!string.IsNullOrEmpty(search.Name))
+            {
+                query = query.Where(x => x.Name.ToLower().Contains(search.Name.ToLower()));
+            }
+
+            int count = query.Count();  //усі запити в таблиці, які можна переглядати
+
+            query = query.OrderBy(x=>x.Name).Skip(page*pageSize).Take(pageSize);
+            var list = query
                 .ProjectTo<ProductItemViewModel>(_mapper.ConfigurationProvider)
                 .ToList();
-            return View(list);
+
+            ProductsHomeViewModel model = new ProductsHomeViewModel()
+            {
+                Data = list,
+                Count = count,
+                Pagination = new Models.Helpers.PaginationViewModel
+                {
+                    PageSize = pageSize,
+                    TotalItems = count
+                },
+                Search = new ProductSearchViewModel
+                {
+                    Name = search.Name,
+                    Page = search.Page ?? 1
+                }
+            };
+            return View(model);
         }
 
         [HttpGet]
         public IActionResult Create()
         {
             var catList = _pizzaDbContext.Categories
-                .Select(x => new { Value = x.Id, Text = x.Name })
+                .Select(x=>new {Value = x.Id, Text = x.Name})
                 .ToList();
 
             ProductCreateViewModel model = new ProductCreateViewModel();
@@ -81,26 +110,6 @@ namespace WebPizzaSite.Controllers
             }
 
             return RedirectToAction("Index");
-        }
-
-        [HttpDelete]
-        public IActionResult Delete(int id)
-        {
-            var entity = _pizzaDbContext.Products.Where(p => p.Id == id).Include(p => p.ProductImages).FirstOrDefault();
-                if (entity.ProductImages != null)
-                {
-                    foreach (var img in entity.ProductImages)
-                    {
-                        var path = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", img.Name);
-                        if (System.IO.File.Exists(path))
-                        {
-                            System.IO.File.Delete(path);
-                        }
-                    }
-                }
-            _pizzaDbContext.Products.Remove(entity);
-            _pizzaDbContext.SaveChanges();
-            return Ok();
         }
     }
 }

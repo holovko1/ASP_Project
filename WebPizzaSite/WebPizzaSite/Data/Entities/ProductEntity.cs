@@ -10,7 +10,7 @@ namespace WebPizzaSite.Data.Entities
         public int Id { get; set; }
         [Required, StringLength(255)]
         public required string Name { get; set; }
-
+     
         public decimal Price { get; set; }
 
         [ForeignKey("Category")]

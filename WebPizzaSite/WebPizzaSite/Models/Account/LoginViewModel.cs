@@ -1,17 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
-namespace WebPizzaSite.Models.Account;
-
-public class LoginViewModel
+namespace WebPizzaSite.Models.Account
 {
-    [Display(Name = "Email Address")]
-    [Required(ErrorMessage = "Please enter your email address.")]
-    [EmailAddress(ErrorMessage = "Invalid email address format.")]
-    public string Email { get; set; } = string.Empty;
+    public class LoginViewModel
+    {
+        [Display(Name = "Email Address")]
+        [Required(ErrorMessage = "Please enter your email address.")]
+        [EmailAddress(ErrorMessage = "Invalid email address format.")]
+        public string Email { get; set; } = string.Empty;
 
-    [Display(Name = "Password")]
-    [Required(ErrorMessage = "Please enter a password.")]
-    [DataType(DataType.Password)]
-    public string Password { get; set; } = string.Empty;
+        [Display(Name = "Password")]
+        [Required(ErrorMessage = "Please enter a password.")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+    }
 }

@@ -1,26 +1,23 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using WebPizzaSite.Constants;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace WebPizzaSite.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = Roles.Admin)]
     public class FormsController : Controller
     {
-        public IActionResult FormElements()
+        public IActionResult Elements()
         {
             return View();
         }
-        public IActionResult FormLayouts()
+        public IActionResult Layouts()
         {
             return View();
         }
-        public IActionResult FormEditors()
+        public IActionResult Editors()
         {
             return View();
         }
-        public IActionResult FormValidation()
+        public IActionResult Validation()
         {
             return View();
         }

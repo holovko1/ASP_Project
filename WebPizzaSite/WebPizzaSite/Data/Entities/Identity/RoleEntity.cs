@@ -4,5 +4,6 @@ namespace WebPizzaSite.Data.Entities.Identity
 {
     public class RoleEntity : IdentityRole<int>
     {
-        public virtual ICollection<UserRoleEntity>? UserRoles { get; set; }   }
+        public virtual ICollection<UserRoleEntity>? UserRoles { get; set; }
+    }
 }

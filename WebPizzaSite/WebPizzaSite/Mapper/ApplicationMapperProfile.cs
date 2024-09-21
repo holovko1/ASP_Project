@@ -13,7 +13,9 @@ public class ApplicationMapperProfile : Profile
             .ForMember(opt=>opt.Image, val=>val.MapFrom(x=>"/uploads/"+x.Image));
         CreateMap<CategoryCreateViewModel, CategoryEntity>()
             .ForMember(opt=>opt.Image, val=>val.Ignore());
+
         CreateMap<ProductEntity, ProductItemViewModel>()
-            .ForMember(opt => opt.Images, val => val.MapFrom(x => x.ProductImages != null ? x.ProductImages.Select(x => x.Name).ToList() : new List<string>()));
+            .ForMember(opt => opt.Images, 
+                val => val.MapFrom(x => x.ProductImages != null ? x.ProductImages.Select(img => img.Name).ToList() : new List<string>()));
     }
 }

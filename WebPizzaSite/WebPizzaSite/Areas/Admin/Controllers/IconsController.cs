@@ -1,18 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using WebPizzaSite.Constants;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace WebPizzaSite.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class IconsController : Controller
     {
-        [Area("Admin")]
-        [Authorize(Roles = Roles.Admin)]
-        public IActionResult BootstrapIcons()
+        public IActionResult Bootstrap()
         {
             return View();
         }
-        public IActionResult RemixIcons()
+        public IActionResult Remix()
         {
             return View();
         }

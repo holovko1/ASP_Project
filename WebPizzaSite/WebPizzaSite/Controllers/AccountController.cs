@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata;
 using WebPizzaSite.Data.Entities.Identity;
 using WebPizzaSite.Models.Account;
 
@@ -31,16 +32,20 @@ namespace WebPizzaSite.Controllers
                 return View(model);
             }
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user != null)
+
+            if (user != null) 
             {
-                var res = await _signInManager.CheckPasswordSignInAsync(user, model.Password, true);
-                if (res.Succeeded)
-                {
+                var res = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: true);
+
+                if (res.Succeeded) 
+                { 
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return Redirect("/");
                 }
             }
+
             ModelState.AddModelError("", "Дані вказано не вірно!");
+
             return View(model);
         }
 

@@ -12,11 +12,12 @@ namespace WebPizzaSite.Areas.Admin.Controllers
         {
             return View();
         }
-
+        
         public IActionResult Alerts()
         {
             return View();
         }
+
         public IActionResult Accordion()
         {
             return View();
